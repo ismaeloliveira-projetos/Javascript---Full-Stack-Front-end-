@@ -16,31 +16,47 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   const API_URL = 'https://shortener-backend-7qu0.onrender.com';
+  const API_KEY = process.env.NEXT_PUBLIC_API_KEY; // Token da API
 
   useEffect(() => {
     fetchUrls();
   }, []);
 
   const fetchUrls = async () => {
-    const res = await fetch(`${API_URL}/urls`);
-    const data = await res.json();
-    setUrls(data);
+    try {
+      const res = await fetch(`${API_URL}/urls`, {
+        headers: {
+          Authorization: `Bearer ${API_KEY}`,
+        },
+      });
+      const data = await res.json();
+      // Garante que urls seja sempre um array
+      setUrls(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Erro ao buscar URLs:', err);
+      setUrls([]);
+    }
   };
 
   const handleShorten = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputUrl) return;
+
     setLoading(true);
     try {
-      await fetch(`${API_URL}/shorten`, {
+      const res = await fetch(`${API_URL}/shorten`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${API_KEY}`,
+        },
         body: JSON.stringify({ url: inputUrl }),
       });
+      const data = await res.json();
       setInputUrl('');
       await fetchUrls();
     } catch (err) {
-      console.error(err);
+      console.error('Erro ao encurtar URL:', err);
     } finally {
       setLoading(false);
     }
@@ -50,7 +66,11 @@ export default function Home() {
     try {
       const res = await fetch(`${API_URL}/redirect/${shortCode}`);
       const data = await res.json();
-      window.open(data.originalUrl, '_blank');
+      if (data.originalUrl) {
+        window.open(data.originalUrl, '_blank');
+      } else {
+        alert('URL não encontrada.');
+      }
       await fetchUrls();
     } catch (err) {
       console.error('Erro ao redirecionar:', err);
@@ -66,13 +86,11 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-tr from-[#0b0f1a] via-[#1c1c2e] to-[#0b0f1a] p-8 font-sans text-white flex items-center justify-center">
       <div className="w-full max-w-4xl">
-        {/* Card */}
         <div className="bg-[#121421] border border-purple-600 shadow-[0_0_20px_rgba(128,0,255,0.5)] rounded-2xl p-6">
           <h1 className="text-4xl font-extrabold text-center bg-gradient-to-r from-purple-400 via-pink-500 to-blue-400 bg-clip-text text-transparent mb-6">
             🚀 Encurtador de URLs Futurista
           </h1>
 
-          {/* Formulário */}
           <form onSubmit={handleShorten} className="flex gap-3 mb-6">
             <input
               type="url"
@@ -91,7 +109,6 @@ export default function Home() {
             </button>
           </form>
 
-          {/* Tabela */}
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-white">
               <thead className="bg-[#0f0f1a] text-purple-400 uppercase text-sm tracking-wide">
@@ -103,45 +120,50 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-                {urls.map((url) => (
-                  <tr
-                    key={url.id}
-                    className="hover:bg-purple-700/20 cursor-pointer transition-colors duration-200"
-                  >
-                    <td
-                      title={url.originalUrl}
-                      className="p-3 truncate max-w-[250px] text-gray-200"
+                {urls.length > 0 ? (
+                  urls.map((url) => (
+                    <tr
+                      key={url.id}
+                      className="hover:bg-purple-700/20 cursor-pointer transition-colors duration-200"
                     >
-                      {url.originalUrl}
-                    </td>
-                    <td
-                      onClick={() => goToShortUrl(url.shortCode)}
-                      className="p-3 text-purple-400 font-semibold hover:underline"
-                    >
-                      {`${API_URL}/${url.shortCode}`}
-                    </td>
-                    <td className="p-3 text-center text-pink-400 font-medium">
-                      {url.clicks}
-                    </td>
-                    <td className="p-3 text-center">
-                      <button
-                        onClick={() => copyToClipboard(url.shortCode)}
-                        className="flex items-center gap-1 px-2 py-1 border border-purple-500 text-purple-300 hover:bg-purple-700/30 rounded transition"
+                      <td
+                        title={url.originalUrl}
+                        className="p-3 truncate max-w-[250px] text-gray-200"
                       >
-                        <ClipboardCopyIcon className="w-4 h-4" />
-                        Copiar
-                      </button>
+                        {url.originalUrl}
+                      </td>
+                      <td
+                        onClick={() => goToShortUrl(url.shortCode)}
+                        className="p-3 text-purple-400 font-semibold hover:underline"
+                      >
+                        {`${API_URL}/${url.shortCode}`}
+                      </td>
+                      <td className="p-3 text-center text-pink-400 font-medium">
+                        {url.clicks}
+                      </td>
+                      <td className="p-3 text-center">
+                        <button
+                          onClick={() => copyToClipboard(url.shortCode)}
+                          className="flex items-center gap-1 px-2 py-1 border border-purple-500 text-purple-300 hover:bg-purple-700/30 rounded transition"
+                        >
+                          <ClipboardCopyIcon className="w-4 h-4" />
+                          Copiar
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="text-center text-gray-400 mt-4 animate-pulse"
+                    >
+                      Nenhuma URL criada ainda.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
-
-            {urls.length === 0 && (
-              <p className="text-center text-gray-400 mt-4 animate-pulse">
-                Nenhuma URL criada ainda.
-              </p>
-            )}
           </div>
         </div>
       </div>
