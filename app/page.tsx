@@ -15,26 +15,10 @@ export default function Home() {
   const [urls, setUrls] = useState<UrlData[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const API_URL = 'http://localhost:3001';
-
-  // Typewriter effect
-  const titleText = 'Encurtador de Links';
-  const [typedTitle, setTypedTitle] = useState('');
-  const subtitleText = 'Intuitivo, Seguro e Dinâmico';
+  const API_URL = 'https://shortener-backend-7qu0.onrender.com';
 
   useEffect(() => {
     fetchUrls();
-  }, []);
-
-  // Typewriter animation
-  useEffect(() => {
-    let index = 0;
-    const interval = setInterval(() => {
-      setTypedTitle(titleText.slice(0, index + 1));
-      index++;
-      if (index === titleText.length) clearInterval(interval);
-    }, 150);
-    return () => clearInterval(interval);
   }, []);
 
   const fetchUrls = async () => {
@@ -76,6 +60,7 @@ export default function Home() {
   const copyToClipboard = (shortCode: string) => {
     const fullShortUrl = `${API_URL}/${shortCode}`;
     navigator.clipboard.writeText(fullShortUrl);
+    alert(`Link copiado: ${fullShortUrl}`);
   };
 
   return (
@@ -83,20 +68,15 @@ export default function Home() {
       <div className="w-full max-w-4xl">
         {/* Card */}
         <div className="bg-[#121421] border border-purple-600 shadow-[0_0_20px_rgba(128,0,255,0.5)] rounded-2xl p-6">
-          {/* Title com efeito typewriter */}
-          <h1 className="text-4xl font-extrabold text-center bg-gradient-to-r from-purple-400 via-pink-500 to-blue-400 bg-clip-text text-transparent mb-2">
-            {typedTitle}
-            <span className="animate-pulse">|</span>
+          <h1 className="text-4xl font-extrabold text-center bg-gradient-to-r from-purple-400 via-pink-500 to-blue-400 bg-clip-text text-transparent mb-6">
+            🚀 Encurtador de URLs Futurista
           </h1>
-          <p className="text-center text-purple-300 mb-6 text-lg">
-            {subtitleText}
-          </p>
 
           {/* Formulário */}
           <form onSubmit={handleShorten} className="flex gap-3 mb-6">
             <input
               type="url"
-              placeholder="Cole seu link aqui (http://...)"
+              placeholder="Cole sua URL aqui (http://...)"
               value={inputUrl}
               onChange={(e) => setInputUrl(e.target.value)}
               className="flex-1 p-3 bg-[#1a1a2e] border border-purple-600 placeholder:text-gray-400 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg transition"
