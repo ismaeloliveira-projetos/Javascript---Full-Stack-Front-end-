@@ -30,7 +30,6 @@ export default function Home() {
         },
       });
       const data = await res.json();
-      // Garante que urls seja sempre um array
       setUrls(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Erro ao buscar URLs:', err);
@@ -88,7 +87,7 @@ export default function Home() {
       <div className="w-full max-w-4xl">
         <div className="bg-[#121421] border border-purple-600 shadow-[0_0_20px_rgba(128,0,255,0.5)] rounded-2xl p-6">
           <h1 className="text-4xl font-extrabold text-center bg-gradient-to-r from-purple-400 via-pink-500 to-blue-400 bg-clip-text text-transparent mb-6">
-            🚀 Encurtador de URLs Futurista
+            Intuitivo, Seguro e Dinâmico – Encurtador de Links
           </h1>
 
           <form onSubmit={handleShorten} className="flex gap-3 mb-6">
