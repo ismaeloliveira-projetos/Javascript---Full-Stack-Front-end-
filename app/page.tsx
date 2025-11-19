@@ -1,5 +1,7 @@
 'use client';
+
 import { useState, useEffect } from 'react';
+import { ClipboardCopyIcon } from 'lucide-react';
 
 interface UrlData {
   id: number;
@@ -29,7 +31,6 @@ export default function Home() {
     e.preventDefault();
     if (!inputUrl) return;
     setLoading(true);
-
     try {
       await fetch(`${API_URL}/shorten`, {
         method: 'POST',
@@ -49,8 +50,8 @@ export default function Home() {
     try {
       const res = await fetch(`${API_URL}/redirect/${shortCode}`);
       const data = await res.json();
-      window.open(data.originalUrl, '_blank'); // abre a URL em nova aba
-      await fetchUrls(); // atualiza clicks
+      window.open(data.originalUrl, '_blank');
+      await fetchUrls();
     } catch (err) {
       console.error('Erro ao redirecionar:', err);
     }
@@ -63,75 +64,85 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8 font-sans text-gray-800">
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">
-          Encurtador de URL
-        </h1>
+    <div className="min-h-screen bg-gradient-to-tr from-[#0b0f1a] via-[#1c1c2e] to-[#0b0f1a] p-8 font-sans text-white flex items-center justify-center">
+      <div className="w-full max-w-4xl">
+        {/* Card */}
+        <div className="bg-[#121421] border border-purple-600 shadow-[0_0_20px_rgba(128,0,255,0.5)] rounded-2xl p-6">
+          <h1 className="text-4xl font-extrabold text-center bg-gradient-to-r from-purple-400 via-pink-500 to-blue-400 bg-clip-text text-transparent mb-6">
+            🚀 Encurtador de URLs Futurista
+          </h1>
 
-        <form onSubmit={handleShorten} className="flex gap-2 mb-8">
-          <input
-            type="url"
-            placeholder="Cole sua URL aqui (http://...)"
-            className="flex-1 p-3 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-            value={inputUrl}
-            onChange={(e) => setInputUrl(e.target.value)}
-            required
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition disabled:bg-blue-300"
-          >
-            {loading ? 'Encurtando...' : 'Encurtar'}
-          </button>
-        </form>
+          {/* Formulário */}
+          <form onSubmit={handleShorten} className="flex gap-3 mb-6">
+            <input
+              type="url"
+              placeholder="Cole sua URL aqui (http://...)"
+              value={inputUrl}
+              onChange={(e) => setInputUrl(e.target.value)}
+              className="flex-1 p-3 bg-[#1a1a2e] border border-purple-600 placeholder:text-gray-400 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg transition"
+              required
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-500 hover:scale-105 transform transition-all shadow-lg shadow-purple-500/50 rounded-lg"
+            >
+              {loading ? 'Encurtando...' : 'Encurtar'}
+            </button>
+          </form>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50 border-b">
-                <th className="p-3 text-sm font-semibold">Original</th>
-                <th className="p-3 text-sm font-semibold">Encurtada</th>
-                <th className="p-3 text-sm font-semibold text-center">
-                  Cliques
-                </th>
-                <th className="p-3 text-sm font-semibold text-center">Ação</th>
-              </tr>
-            </thead>
-            <tbody>
-              {urls.map((url) => (
-                <tr key={url.id} className="border-b hover:bg-gray-50">
-                  <td
-                    className="p-3 text-sm truncate max-w-[200px]"
-                    title={url.originalUrl}
-                  >
-                    {url.originalUrl}
-                  </td>
-                  <td
-                    className="p-3 text-sm text-blue-600 font-medium cursor-pointer"
-                    onClick={() => goToShortUrl(url.shortCode)}
-                  >
-                    {`${API_URL}/${url.shortCode}`}
-                  </td>
-                  <td className="p-3 text-sm text-center">{url.clicks}</td>
-                  <td className="p-3 text-center">
-                    <button
-                      onClick={() => copyToClipboard(url.shortCode)}
-                      className="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
-                    >
-                      Copiar
-                    </button>
-                  </td>
+          {/* Tabela */}
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-white">
+              <thead className="bg-[#0f0f1a] text-purple-400 uppercase text-sm tracking-wide">
+                <tr>
+                  <th className="p-3 text-left">Original</th>
+                  <th className="p-3 text-left">Encurtada</th>
+                  <th className="p-3 text-center">Cliques</th>
+                  <th className="p-3 text-center">Ação</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {urls.length === 0 && (
-            <p className="text-center text-gray-500 mt-4">
-              Nenhuma URL criada ainda.
-            </p>
-          )}
+              </thead>
+              <tbody>
+                {urls.map((url) => (
+                  <tr
+                    key={url.id}
+                    className="hover:bg-purple-700/20 cursor-pointer transition-colors duration-200"
+                  >
+                    <td
+                      title={url.originalUrl}
+                      className="p-3 truncate max-w-[250px] text-gray-200"
+                    >
+                      {url.originalUrl}
+                    </td>
+                    <td
+                      onClick={() => goToShortUrl(url.shortCode)}
+                      className="p-3 text-purple-400 font-semibold hover:underline"
+                    >
+                      {`${API_URL}/${url.shortCode}`}
+                    </td>
+                    <td className="p-3 text-center text-pink-400 font-medium">
+                      {url.clicks}
+                    </td>
+                    <td className="p-3 text-center">
+                      <button
+                        onClick={() => copyToClipboard(url.shortCode)}
+                        className="flex items-center gap-1 px-2 py-1 border border-purple-500 text-purple-300 hover:bg-purple-700/30 rounded transition"
+                      >
+                        <ClipboardCopyIcon className="w-4 h-4" />
+                        Copiar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {urls.length === 0 && (
+              <p className="text-center text-gray-400 mt-4 animate-pulse">
+                Nenhuma URL criada ainda.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>
