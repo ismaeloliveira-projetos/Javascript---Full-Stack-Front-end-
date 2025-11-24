@@ -15,11 +15,25 @@ export default function Home() {
   const [urls, setUrls] = useState<UrlData[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const API_URL = 'https://shortener-backend-7qu0.onrender.com';
-  const API_KEY = process.env.NEXT_PUBLIC_API_KEY; // Token da API
+  // CORRIGIDO – porta do backend
+  const API_URL = 'http://localhost:3001';
+
+  // sua auth key
+  const API_KEY = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+
+  // animação
+  const [typedText, setTypedText] = useState('');
+  const fullText = 'Encurtador de Links';
 
   useEffect(() => {
     fetchUrls();
+    let index = 0;
+    const typingInterval = setInterval(() => {
+      setTypedText(fullText.slice(0, index + 1));
+      index++;
+      if (index === fullText.length) clearInterval(typingInterval);
+    }, 150);
+    return () => clearInterval(typingInterval);
   }, []);
 
   const fetchUrls = async () => {
@@ -29,6 +43,7 @@ export default function Home() {
           Authorization: `Bearer ${API_KEY}`,
         },
       });
+
       const data = await res.json();
       setUrls(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -49,11 +64,12 @@ export default function Home() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${API_KEY}`,
         },
-        body: JSON.stringify({ url: inputUrl }),
+        body: JSON.stringify({ url: inputUrl }), // >>> CORRETO
       });
-      const data = await res.json();
+
+      await res.json();
       setInputUrl('');
-      await fetchUrls();
+      fetchUrls();
     } catch (err) {
       console.error('Erro ao encurtar URL:', err);
     } finally {
@@ -65,12 +81,13 @@ export default function Home() {
     try {
       const res = await fetch(`${API_URL}/redirect/${shortCode}`);
       const data = await res.json();
+
       if (data.originalUrl) {
         window.open(data.originalUrl, '_blank');
       } else {
         alert('URL não encontrada.');
       }
-      await fetchUrls();
+      fetchUrls();
     } catch (err) {
       console.error('Erro ao redirecionar:', err);
     }
@@ -86,9 +103,13 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-tr from-[#0b0f1a] via-[#1c1c2e] to-[#0b0f1a] p-8 font-sans text-white flex items-center justify-center">
       <div className="w-full max-w-4xl">
         <div className="bg-[#121421] border border-purple-600 shadow-[0_0_20px_rgba(128,0,255,0.5)] rounded-2xl p-6">
-          <h1 className="text-4xl font-extrabold text-center bg-gradient-to-r from-purple-400 via-pink-500 to-blue-400 bg-clip-text text-transparent mb-6">
-            Intuitivo, Seguro e Dinâmico – Encurtador de Links
+          <h1 className="text-4xl font-extrabold text-center bg-gradient-to-r from-purple-400 via-pink-500 to-blue-400 bg-clip-text text-transparent mb-2">
+            {typedText}
+            <span className="animate-pulse">|</span>
           </h1>
+          <p className="text-center text-purple-300 mb-6">
+            Intuitivo, Seguro e Dinâmico
+          </p>
 
           <form onSubmit={handleShorten} className="flex gap-3 mb-6">
             <input
@@ -131,15 +152,18 @@ export default function Home() {
                       >
                         {url.originalUrl}
                       </td>
+
                       <td
                         onClick={() => goToShortUrl(url.shortCode)}
                         className="p-3 text-purple-400 font-semibold hover:underline"
                       >
                         {`${API_URL}/${url.shortCode}`}
                       </td>
+
                       <td className="p-3 text-center text-pink-400 font-medium">
                         {url.clicks}
                       </td>
+
                       <td className="p-3 text-center">
                         <button
                           onClick={() => copyToClipboard(url.shortCode)}
