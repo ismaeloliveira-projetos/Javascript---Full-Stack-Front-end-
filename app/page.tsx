@@ -15,10 +15,8 @@ export default function Home() {
   const [urls, setUrls] = useState<UrlData[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // porta do backend
+  // variáveis de ambiente
   const API_URL = process.env.NEXT_PUBLIC_API_URL!;
-
-  //  auth key
   const API_KEY = process.env.NEXT_PUBLIC_API_KEY!;
 
   // animação
@@ -27,15 +25,19 @@ export default function Home() {
 
   useEffect(() => {
     fetchUrls();
+
+    // animação do título
     let index = 0;
     const typingInterval = setInterval(() => {
       setTypedText(fullText.slice(0, index + 1));
       index++;
       if (index === fullText.length) clearInterval(typingInterval);
     }, 150);
+
     return () => clearInterval(typingInterval);
   }, []);
 
+  // Buscar URLs no backend
   const fetchUrls = async () => {
     try {
       const res = await fetch(`${API_URL}/urls`, {
@@ -45,13 +47,16 @@ export default function Home() {
       });
 
       const data = await res.json();
-      setUrls(Array.isArray(data) ? data : []);
+
+      // O backend retorna: { total: number, urls: [] }
+      setUrls(Array.isArray(data.urls) ? data.urls : []);
     } catch (err) {
       console.error('Erro ao buscar URLs:', err);
       setUrls([]);
     }
   };
 
+  // Criar URL encurtada
   const handleShorten = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputUrl) return;
@@ -64,7 +69,7 @@ export default function Home() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${API_KEY}`,
         },
-        body: JSON.stringify({ url: inputUrl }), // >>> CORRETO
+        body: JSON.stringify({ url: inputUrl }),
       });
 
       await res.json();
@@ -77,6 +82,7 @@ export default function Home() {
     }
   };
 
+  // Redirecionar com contagem de clique
   const goToShortUrl = async (shortCode: string) => {
     try {
       const res = await fetch(`${API_URL}/redirect/${shortCode}`);
@@ -87,23 +93,25 @@ export default function Home() {
       } else {
         alert('URL não encontrada.');
       }
+
       fetchUrls();
     } catch (err) {
       console.error('Erro ao redirecionar:', err);
     }
   };
 
+  // Copiar link encurtado
   const copyToClipboard = (shortCode: string) => {
-    const fullShortUrl = `${API_URL}/${shortCode}`;
+    const fullShortUrl = `${API_URL}/redirect/${shortCode}`;
     navigator.clipboard.writeText(fullShortUrl);
     alert(`Link copiado: ${fullShortUrl}`);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-[#0b0f1a] via-[#1c1c2e] to-[#0b0f1a] p-8 font-sans text-white flex items-center justify-center">
+    <div className="min-h-screen bg-linear-to-tr from-[#0b0f1a] via-[#1c1c2e] to-[#0b0f1a] p-8 font-sans text-white flex items-center justify-center">
       <div className="w-full max-w-4xl">
         <div className="bg-[#121421] border border-purple-600 shadow-[0_0_20px_rgba(128,0,255,0.5)] rounded-2xl p-6">
-          <h1 className="text-4xl font-extrabold text-center bg-gradient-to-r from-purple-400 via-pink-500 to-blue-400 bg-clip-text text-transparent mb-2">
+          <h1 className="text-4xl font-extrabold text-center bg-linear-to-r from-purple-400 via-pink-500 to-blue-400 bg-clip-text text-transparent mb-2">
             {typedText}
             <span className="animate-pulse">|</span>
           </h1>
@@ -123,7 +131,7 @@ export default function Home() {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-500 hover:scale-105 transform transition-all shadow-lg shadow-purple-500/50 rounded-lg"
+              className="px-6 py-3 bg-linear-to-r from-purple-600 to-pink-500 hover:scale-105 transform transition-all shadow-lg shadow-purple-500/50 rounded-lg"
             >
               {loading ? 'Encurtando...' : 'Encurtar'}
             </button>
@@ -157,7 +165,7 @@ export default function Home() {
                         onClick={() => goToShortUrl(url.shortCode)}
                         className="p-3 text-purple-400 font-semibold hover:underline"
                       >
-                        {`${API_URL}/${url.shortCode}`}
+                        {`${API_URL}/redirect/${url.shortCode}`}
                       </td>
 
                       <td className="p-3 text-center text-pink-400 font-medium">
