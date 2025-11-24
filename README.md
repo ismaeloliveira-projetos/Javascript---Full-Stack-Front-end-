@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+📘 Front-end – Encurtador de URL (Next.js + TypeScript)
 
-## Getting Started
 
-First, run the development server:
+Este é o front-end do sistema de encurtamento de URLs, desenvolvido em Next.js, utilizando TypeScript e consumindo a API hospedada em:
+https://shortener-backend-7qu0.onrender.com
 
-```bash
+
+
+<img width="1884" height="899" alt="Captura de tela 2025-11-24 110903" src="https://github.com/user-attachments/assets/a9aa925a-964f-451f-9ae4-91436815573d" />
+
+
+
+
+
+
+
+
+🚀 Funcionalidades
+
+Interface simples e intuitiva para encurtar URLs
+
+Consumo da API backend (NestJS)
+
+Exibição do código encurtado
+
+Copiar URL encurtada para a área de transferência
+
+Tratamento básico de erros
+
+Tipagem completa com TypeScript
+
+🛠️ Tecnologias
+
+Next.js 14+ (App Router)
+
+TypeScript
+
+CSS / Tailwind (se estiver usando)
+
+Fetch API / Axios
+
+Deploy opcional em Vercel
+
+🔧 Variáveis de Ambiente
+
+Crie um arquivo .env.local na raiz:
+
+NEXT_PUBLIC_API_URL=https://shortener-backend-7qu0.onrender.com
+NEXT_PUBLIC_API_KEY=f47ac10b-58cc-4372-a567-0e02b2c3d479
+
+
+Essas variáveis serão utilizadas nas requisições do front-end.
+
+📦 Instalação
+1️⃣ Instalar dependências
+npm install
+
+
+ou
+
+yarn install
+
+▶️ Executar o Projeto
+Ambiente de desenvolvimento
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+A aplicação rodará em:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+http://localhost:3000
 
-## Learn More
+🔗 Integração com o Backend
 
-To learn more about Next.js, take a look at the following resources:
+Exemplo de chamada POST /shorten:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+export async function shortenUrl(originalUrl: string) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/shorten`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.NEXT_PUBLIC_API_KEY!,
+    },
+    body: JSON.stringify({ originalUrl }),
+  });
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+  if (!res.ok) {
+    throw new Error('Erro ao encurtar URL');
+  }
 
-## Deploy on Vercel
+  return res.json();
+}
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+🧱 Scripts úteis
+Comando	Descrição
+npm run dev	Inicia o ambiente de desenvolvimento
+npm run build	Gera build de produção
+npm run start	Executa build
+npm run lint	Verifica o código
+🌐 Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+https://javascript-full-stack-front-end.vercel.app/
+
+
+Configurar variáveis de ambiente:
+
+NEXT_PUBLIC_API_URL
+NEXT_PUBLIC_API_KEY
+
+
+
+✔️ Conclusão
+
+Este README cobre tudo o que seu front-end Next.js precisa:
+
+Instalação
+
+Execução
+
+Integração com o backend
+
+Variáveis de ambiente
+
+Deploy
