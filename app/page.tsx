@@ -15,11 +15,11 @@ export default function Home() {
   const [urls, setUrls] = useState<UrlData[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // CORRIGIDO – porta do backend
-  const API_URL = 'http://localhost:3001';
+  // porta do backend
+  const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
-  // sua auth key
-  const API_KEY = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+  //  auth key
+  const API_KEY = process.env.NEXT_PUBLIC_API_KEY!;
 
   // animação
   const [typedText, setTypedText] = useState('');
