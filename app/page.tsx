@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useNotification } from './storeNotification';
 import { ClipboardCopyIcon } from 'lucide-react';
 
 interface UrlData {
@@ -11,6 +12,8 @@ interface UrlData {
 }
 
 export default function Home() {
+  // Zustand hook deve ser chamado dentro do componente
+  const notification = useNotification();
   const [inputUrl, setInputUrl] = useState('');
   const [urls, setUrls] = useState<UrlData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -35,6 +38,7 @@ export default function Home() {
     }, 150);
 
     return () => clearInterval(typingInterval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Buscar URLs no backend
@@ -45,13 +49,11 @@ export default function Home() {
           Authorization: `Bearer ${API_KEY}`,
         },
       });
-
+      if (!res.ok) throw new Error('Erro ao buscar URLs');
       const data = await res.json();
-
-      // O backend retorna: { total: number, urls: [] }
       setUrls(Array.isArray(data.urls) ? data.urls : []);
-    } catch (err) {
-      console.error('Erro ao buscar URLs:', err);
+    } catch {
+      notification.setNotification('Erro ao buscar URLs', 'error');
       setUrls([]);
     }
   };
@@ -71,12 +73,20 @@ export default function Home() {
         },
         body: JSON.stringify({ url: inputUrl }),
       });
-
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        notification.setNotification(
+          errData?.message?.message || 'Erro ao encurtar URL',
+          'error',
+        );
+        return;
+      }
       await res.json();
       setInputUrl('');
+      notification.setNotification('URL encurtada com sucesso!', 'success');
       fetchUrls();
-    } catch (err) {
-      console.error('Erro ao encurtar URL:', err);
+    } catch {
+      notification.setNotification('Erro ao encurtar URL', 'error');
     } finally {
       setLoading(false);
     }
@@ -87,16 +97,15 @@ export default function Home() {
     try {
       const res = await fetch(`${API_URL}/redirect/${shortCode}`);
       const data = await res.json();
-
       if (data.originalUrl) {
         window.open(data.originalUrl, '_blank');
+        notification.setNotification('Redirecionado com sucesso!', 'success');
       } else {
-        alert('URL não encontrada.');
+        notification.setNotification('URL não encontrada.', 'error');
       }
-
       fetchUrls();
-    } catch (err) {
-      console.error('Erro ao redirecionar:', err);
+    } catch {
+      notification.setNotification('Erro ao redirecionar', 'error');
     }
   };
 
@@ -104,7 +113,7 @@ export default function Home() {
   const copyToClipboard = (shortCode: string) => {
     const fullShortUrl = `${API_URL}/redirect/${shortCode}`;
     navigator.clipboard.writeText(fullShortUrl);
-    alert(`Link copiado: ${fullShortUrl}`);
+    notification.setNotification(`Link copiado: ${fullShortUrl}`, 'success');
   };
 
   return (
@@ -118,6 +127,21 @@ export default function Home() {
           <p className="text-center text-purple-300 mb-6">
             Intuitivo, Seguro e Dinâmico
           </p>
+
+          {/* Notificação global */}
+          {notification.show && (
+            <div
+              className={`mb-4 px-4 py-2 rounded text-center font-semibold transition-all duration-300 ${
+                notification.type === 'success'
+                  ? 'bg-green-700 text-green-100'
+                  : 'bg-red-700 text-red-100'
+              }`}
+              onClick={notification.clearNotification}
+              style={{ cursor: 'pointer' }}
+            >
+              {notification.message}
+            </div>
+          )}
 
           <form onSubmit={handleShorten} className="flex gap-3 mb-6">
             <input
