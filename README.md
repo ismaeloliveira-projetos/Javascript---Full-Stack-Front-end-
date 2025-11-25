@@ -27,9 +27,9 @@ Este é o front-end do sistema de encurtamento de URLs, desenvolvido em **Next.j
 
 - **Next.js 14+ (App Router)**
 - **TypeScript**
-- **CSS / Tailwind** (se estiver usando)
+- **CSS / Tailwind** 
 - **Fetch API / Axios**
-- **Deploy opcional em Vercel**
+
 
 ---
 
